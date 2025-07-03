@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>I Love You – A Magical Journey</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css?family=Sacramento:400,700|Poppins:400,700&display=swap" rel="stylesheet">
+  <style>
+    html, body {
+      margin: 0; padding: 0; width: 100vw; min-height: 100vh;
+      background: linear-gradient(135deg, #ffe8f0 0%, #b39ddb 100%);
+      font-family: 'Poppins', sans-serif; color: #4a0036; overflow-x: hidden;
+    }
+    body { min-height: 100vh; }
+    .bg-anim, .bg-anim * { pointer-events:none; user-select:none; }
+    .bg-anim { position: fixed; top:0; left:0; width:100vw; height:100vh; z-index:0; }
+    .page {
+      display: none; width: 100vw; min-height: 100vh; position: absolute; left: 0; top: 0;
+      flex-direction: column; align-items: center; justify-content: flex-start; background: transparent;
+      z-index: 2; animation: fadeIn 1s; box-sizing: border-box; overflow-y: auto;
+    }
+    .page.active { display: flex; animation: fadeIn 1s; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(40px);} to { opacity: 1; transform: translateY(0);} }
+    .next-btn {
+      margin: 3em auto 2em auto; padding: 0.7em 2.2em; font-family: 'Sacramento', cursive; font-size: 1.4em;
+      color: #fff; background: linear-gradient(90deg, #ffb7c5 80%, #f8bbd0 100%);
+      border: none; border-radius: 2em; box-shadow: 0 2px 18px #ffb7c560; cursor: pointer;
+      transition: background 0.23s, color 0.15s, transform 0.15s; outline: none; letter-spacing: 1.3px;
+      text-shadow: 0 2px 16px #b39ddb44; z-index: 12;
+    }
+    .next-btn:active { background: #ff6f91; color: #fff; transform: scale(0.98);}
+    /* PAGE 1: Envelope */
+    .envelope-scene { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; }
+    .envelope-container { position: relative; width: 320px; height: 230px; margin: 0 auto; }
+    .envelope {
+      width: 320px; height: 230px; perspective: 1200px; position: relative; cursor: pointer; z-index: 10;
+      box-shadow: 0 6px 28px #b39ddb55; border-radius: 0 0 30px 30px; background: transparent;
+    }
+    .envelope-flap {
+      position: absolute; top: -98px; left: 0; width: 320px; height: 110px; background: #ffd6e0;
+      border-bottom: 3px solid #ffb7c5; border-radius: 0 0 180px 180px/0 0 120px 120px;
+      transform-origin: bottom center; z-index: 12; box-shadow: 0 8px 28px #b39ddb44;
+      display: flex; align-items: flex-end; justify-content: center;
+      transition: transform 1.1s cubic-bezier(.54,2,.38,.93);
+    }
+    .envelope.open .envelope-flap { transform: rotateX(-120deg);}
+    .envelope-base {
+      width: 320px; height: 185px; background: #fff; border: 2.5px solid #ffd6e0; border-radius: 0 0 24px 24px;
+      position: absolute; left: 0; top: 0; z-index: 10; box-shadow: 0 4px 18px #ffb7c540;
+      display: flex; align-items: flex-end; justify-content: center; overflow: hidden;
+    }
+    /* Heart button on envelope */
+    .envelope-heart-btn {
+      position: absolute; left: 50%; top: 38px; transform: translateX(-50%);
+      width: 64px; height: 64px; z-index: 20; display: flex; align-items: center; justify-content: center;
+    }
+    .envelope-heart {
+      width: 60px; height: 60px; background: radial-gradient(circle at 70% 30%, #ff6f91 80%, #ffb7c5 100%);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.3em;
+      box-shadow: 0 2px 16px #ffb7c540, 0 0 0 0 #ffb7c5;
+      cursor: pointer; transition: box-shadow 0.22s, transform 0.18s;
+      color: #fff; text-shadow: 0 2px 10px #c2185b80;
+      animation: beat 1.1s infinite;
+    }
+    .envelope-heart:active { transform: scale(0.92); box-shadow: 0 0 0 8px #ffb7c5bb;}
+    @keyframes beat {
+      0%,100% { transform: scale(1);}
+      10% { transform: scale(1.12);}
+      15% { transform: scale(0.94);}
+      25% { transform: scale(1.06);}
+      50% { transform: scale(1);}
+    }
+    .envelope.open .envelope-heart-btn { opacity: 0; pointer-events: none; }
+    /* When envelope opens, show full screen overlay */
+    .envelope-fullscreen {
+      position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; z-index: 30;
+      background: rgba(255,255,255,0.91); display: none; align-items: center; justify-content: center; flex-direction: column;
+      animation: fadeIn 1.2s;
+    }
+    .envelope.open + .envelope-fullscreen { display: flex; }
+    .love-floating {
+      pointer-events: none; position: absolute; left: 0; top: 0; width: 100vw; height: 100vh; z-index: 45;
+      overflow: hidden;
+    }
+    /* Love sticker and image in letter */
+    .letter-content {
+      width: 320px; max-width: 98vw; background: #fff7fa; border-radius: 22px; box-shadow: 0 2px 30px #ffb7c522;
+      border: 3px solid #ffd6e0; padding: 2.2em 1.5em 1.7em 1.5em; display: flex; flex-direction: column;
+      align-items: center; margin-top: 2vh; position: relative; z-index: 101;
+      animation: fadeIn 1.2s;
+    }
+    .letter-img {
+      width: 110px; height: 110px; object-fit: cover; border-radius: 16px; box-shadow: 0 3px 16px #ffb7c560;
+      margin-bottom: 0.5em;
+    }
+    .sticker {
+      font-size: 2.4em; margin: 0.2em 0 0.8em 0; animation: stickerPop 0.9s cubic-bezier(.27,1.7,.56,.98);
+      text-shadow: 0 2px 10px #ff6f9199;
+    }
+    @keyframes stickerPop { 0% {transform:scale(0.3); opacity:0;} 80%{transform:scale(1.18);opacity:1;} 100%{transform:scale(1);opacity:1;} }
+    .letter-text {
+      font-family: 'Sacramento', cursive; font-size: 1.4em; color: #b00055; text-align: center; line-height: 1.6;
+      margin: 0.8em 0 0 0; text-shadow: 0 2px 10px #ffb7c533;
+      letter-spacing: 1.1px;
+    }
+    /* Scrapbook page */
+    .scrapbook-title {
+      font-family: 'Sacramento', cursive; color: #ad1457; font-size: 2em; text-align: center; margin: 2.5em 0 0.3em 0; letter-spacing: 1.2px;
+    }
+    .scrapbook-note { text-align: center; color: #7b1fa2; font-family: 'Poppins', sans-serif; max-width:480px; margin:0 auto 1em auto; font-size:1.09em; line-height:1.5; background: rgba(255,255,255,0.8); border-radius: 13px; padding: 0.7em 1.3em; box-shadow: 0 2px 10px #ffb7c540; animation: fadeIn 1.4s;}
+    .scrapbook-grid {display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; padding: 1.2em 0 1em 0; animation: fadeIn 1s;}
+    .scrapbook-img-frame {position: relative; width: 110px; height: 95px; background: #fff; border-radius: 14px; box-shadow: 0 4px 24px #b39ddb22; cursor: pointer; transition: transform 0.19s, box-shadow 0.19s; border: 2px solid #ffd6e0; overflow: hidden; animation: fadeIn 1.3s;}
+    .scrapbook-img-frame:hover, .scrapbook-img-frame.active {transform: scale(1.13) rotate(-3deg); box-shadow: 0 8px 32px #ff6f9199; border: 2px solid #ff6f91; z-index: 3;}
+    .scrapbook-img-frame img {width: 100%; height: 100%; object-fit: cover; border-radius: 10px; background: #fff; transition: box-shadow 0.19s;}
+    .scrapbook-popup {position: absolute; left: 50%; top: 52%; transform: translate(-50%, -50%); background: #fff4fa; border-radius: 13px; padding: 0.65em 1em; font-family: 'Sacramento', cursive; color: #b00055; font-size: 1.05em; box-shadow: 0 2px 18px #ff6f911f; border: 1.5px solid #ffb7c5; min-width: 120px; min-height: 40px; max-width: 180px; text-align: center; z-index: 12; animation: scrapbookNotePop .33s cubic-bezier(.57,1.47,.63,.86); pointer-events: none;}
+    @keyframes scrapbookNotePop {0% {opacity:0;transform:translate(-50%,-60%) scale(0.7);}100% {opacity:1;transform:translate(-50%,-50%) scale(1);}}
+    /* Polaroid wall */
+    .collage-title { font-family: 'Sacramento', cursive; font-size: 2.1em; color: #ad1457; text-align: center; margin: 2.3em 0 0.1em 0; letter-spacing: 1.2px;}
+    .collage-grid {display: flex; flex-wrap: wrap; gap: 24px 24px; justify-content: center; align-items: flex-start; background: rgba(255,255,255,0.2); border-radius: 24px; margin: 2.2em auto 0 auto; padding: 18px 10px 19px 10px; max-width: 92vw; z-index: 2;}
+    .polaroid {background: #fff; border-radius: 14px; padding: 0.6em 0.6em 1.3em 0.6em; box-shadow: 0 4px 22px #b39ddb33; display: flex; flex-direction: column; align-items: center; width: 160px; position: relative; cursor: pointer; transition: box-shadow 0.2s, transform 0.19s; border: 2.5px solid #ffd6e0; animation: fadeIn 1.3s;}
+    .polaroid:hover { box-shadow: 0 8px 38px #ff6f9199; border: 2.5px solid #ff6f91; z-index: 3; transform: scale(1.09) rotate(-3deg);}
+    .polaroid img {width: 140px; height: 120px; object-fit: cover; border-radius: 11px; box-shadow: 0 3px 16px #ffb7c560;}
+    .polaroid-caption {margin-top: 1em; text-align: center; font-size: 1.02em; color: #ad1457; font-family: 'Sacramento', cursive; letter-spacing: 0.02em;}
+    /* Memory Reel */
+    .reel-title {font-family:'Sacramento',cursive;font-size:2.1em;color:#ad1457;text-align:center;margin:2.3em 0 0.1em 0;letter-spacing:1.2px;}
+    .reel-strip {
+      display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 22px; margin: 2.5em auto 1.5em auto; padding: 11px 0;
+      background: rgba(255,255,255,0.4); border-radius: 36px; box-shadow: 0 4px 24px #ffb7c522; width: 95vw; max-width: 900px;
+      position: relative;
+    }
+    .reel-img-frame {
+      width: 170px; min-width: 170px; height: 130px; background: #fff;
+      border-radius: 20px; box-shadow: 0 4px 24px #b39ddb22; display: flex; align-items: center; justify-content: center;
+      overflow: hidden; border: 2px solid #ffd6e0; position: relative; cursor: pointer; transition: box-shadow 0.19s, transform 0.19s;
+      animation: fadeIn 1s;
+    }
+    .reel-img-frame img { width: 100%; height: 100%; object-fit: cover; border-radius: 16px; }
+    .reel-img-frame:active { transform: scale(1.1) rotate(-3deg); box-shadow: 0 8px 32px #ff6f9199; border: 2px solid #ff6f91; }
+    /* Diary style */
+    .diary-section {
+      width: 97vw; max-width: 660px; margin: 2.5em auto 0 auto; background: rgba(255,255,255,0.93); border-radius: 28px;
+      box-shadow: 0 2px 40px #b39ddb22; padding: 2.5em 1.5em 2.5em 1.5em; border: 2.5px solid #ffd6e0;
+      min-height: 320px; overflow: hidden; position: relative; z-index: 2; margin-bottom: 4em;
+      animation: fadeIn 1.3s;
+    }
+    .diary-title {font-family: 'Sacramento', cursive; color: #ad1457; font-size: 2.15em; text-align: center; margin-bottom: 0.6em; letter-spacing: 2px; text-shadow: 0 4px 24px #ffb7c533;}
+    .diary-entry {font-family: 'Sacramento', cursive; font-size: 1.4em; color: #6c0b36; letter-spacing: 0.05em; line-height: 1.7; background: rgba(255,255,255,0.15); border-left: 3px solid #ff6f91; border-radius: 18px; padding: 1.2em 0.2em 1em 1.1em; margin-bottom: 1.7em; text-shadow: 0 2px 15px #e1bee755;}
+    /* General responsive tweaks */
+    @media (max-width: 700px) {
+      .envelope-container,.envelope,.envelope-flap,.envelope-base,.letter-content { width: 96vw !important; max-width: 96vw !important; }
+      .letter-img { width: 70px; height: 70px;}
+      .collage-grid { gap: 12px 8px;}
+      .polaroid { width: 82vw;}
+      .polaroid img { width: 70vw;}
+      .reel-img-frame { min-width: 38vw; width: 38vw;}
+    }
+    @media (max-width: 480px) {
+      .letter-content { padding: 1em 0.3em 0.9em 0.3em;}
+      .scrapbook-img-frame { width: 33vw; height: 70px;}
+      .scrapbook-grid { gap: 5px;}
+      .polaroid { width: 96vw;}
+      .polaroid img { width: 83vw;}
+    }
+  </style>
+</head>
+<body>
+<audio id="bg-music" src="https://files.catbox.moe/qo3n3e.mp3" autoplay loop></audio>
+<div class="bg-anim" id="bg-anim"></div>
+<!-- PAGE 1: Envelope "I love you" -->
+<section class="page active" id="page-0">
+  <div class="envelope-scene">
+    <div class="envelope-container">
+      <div class="envelope" id="envelope">
+        <div class="envelope-flap"></div>
+        <div class="envelope-base"></div>
+        <div class="envelope-heart-btn" id="envelope-heart-btn">
+          <div class="envelope-heart" id="envelope-heart">❤️</div>
+        </div>
+      </div>
+      <div class="envelope-fullscreen" id="envelope-fullscreen">
+        <div class="love-floating" id="love-floating"></div>
+        <div class="letter-content">
+          <img class="letter-img" src="https://i.ibb.co/1G5FWLMK/IMG-2256.jpg" alt="us">
+          <div class="sticker">💌</div>
+          <div class="letter-text">
+            Dear love,<br>
+            जब भी तेरा नाम लबों पर आता है, दिल मुस्कुरा उठता है, <br>
+            I love you more than words can ever say.<br>
+            My life is magical because you are in it. ❤️
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <button class="next-btn" id="next-btn-0" style="z-index:200;display:none;">Next &rarr;</button>
+</section>
+<!-- PAGE 2: Scrapbook -->
+<section class="page" id="page-1">
+  <div class="scrapbook-title">Our Scrapbook Moments</div>
+  <div class="scrapbook-note">Tap a photo for a love shayari 💕</div>
+  <div class="scrapbook-grid" id="scrapbook-grid"></div>
+  <button class="next-btn" id="next-btn-1">Next &rarr;</button>
+</section>
+<!-- PAGE 3: Polaroid Wall -->
+<section class="page" id="page-2">
+  <div class="collage-title">Polaroid Wall of Memories</div>
+  <div class="collage-grid" id="collage-grid"></div>
+  <button class="next-btn" id="next-btn-2">Next &rarr;</button>
+</section>
+<!-- PAGE 4: Memory Reel -->
+<section class="page" id="page-3">
+  <div class="reel-title">Our Memory Reel</div>
+  <div class="reel-strip" id="reel-strip"></div>
+  <button class="next-btn" id="next-btn-3">Next &rarr;</button>
+</section>
+<!-- PAGE 5: Diary -->
+<section class="page" id="page-4">
+  <div class="diary-section">
+    <div class="diary-title">My Love Diary</div>
+    <div class="diary-entry">
+      आज भी तेरा नाम सुनते ही दिल की धड़कनें बढ़ जाती हैं।<br>
+      तेरी हर बात, हर मुस्कान, मेरे लिए किसी जादू से कम नहीं।<br>
+      I just want to say... I love you, infinitely. 💖
+    </div>
+    <div class="diary-entry">
+      जब भी तेरी याद आती है, मैं अपने दिल से कहता हूँ,<br>
+      "Lucky हूँ मैं जो तू मेरी ज़िन्दगी में है।"<br>
+      Forever yours. 🌸
+    </div>
+    <div class="diary-entry">
+      तेरे बिना ये शामें अधूरी हैं, तेरी हँसी में मेरा सुकून है।<br>
+      हर दिन तुझसे और भी प्यार हो जाता है।<br>
+      Thank you for being my everything. 💘
+    </div>
+  </div>
+</section>
+<script>
+const SCRAPBOOK_IMAGES = [
+  "https://i.ibb.co/0j2DPCmH/IMG-8587.jpg",
+  "https://i.ibb.co/G47Wzv8j/IMG-8588.jpg",
+  "https://i.ibb.co/wZvmRC2C/IMG-8843.jpg",
+  "https://i.ibb.co/jvbkPVcB/IMG-2264.jpg",
+  "https://i.ibb.co/Q367r5tW/IMG-2255.jpg",
+  "https://i.ibb.co/4nTPpmZQ/IMG-2254.jpg",
+  "https://i.ibb.co/jvrMb9FH/IMG-2263.jpg",
+  "https://i.ibb.co/VWfMhxCS/IMG-2259.jpg"
+];
+const SCRAPBOOK_NOTES = [
+  "तेरी यादों की बारिश में, हर शाम भीग जाता हूँ,<br>तेरे बिना इस दिल को, हर पल अधूरा पाता हूँ।",
+  "चाँदनी रातों में तेरा नाम गुनगुनाता हूँ,<br>तेरी मुस्कान के ख्यालों में खुद को खो जाता हूँ।",
+  "हर धड़कन में बसी है तेरी प्यारी सी बातें,<br>तू पास हो या दूर, तुझसे ही चलती है मेरी साँसें।",
+  "तेरे बिना ये मौसम भी सूना सा लगता है,<br>तेरी हँसी से ही मेरा हर दिन सजता है।",
+  "तेरी आवाज़ की मिठास, लफ्ज़ों में बयां नहीं होती,<br>तेरा जिक्र आते ही मेरी रूह मुस्कुरा उठती है।"
+];
+const POLAROIDS = [
+  { src: "https://i.ibb.co/1G5FWLMK/IMG-2256.jpg", note: "The day was brighter with you beside me." },
+  { src: "https://i.ibb.co/vCZQ92Wg/IMG-4083.jpg", note: "All my dreams lead back to you." },
+  { src: "https://i.ibb.co/DPwKfwVL/IMG-2258.jpg", note: "Smiles, sunsets, soft whispers—still with me." },
+  { src: "https://i.ibb.co/Hpxcw67v/IMG-4085.jpg", note: "Each photo a touch, a memory, a longing." },
+  { src: "https://i.ibb.co/Hf82JCpg/IMG-4089.jpg", note: "Missing you is my heart's gentle ache." },
+  { src: "https://i.ibb.co/0j5t9PX7/98ba4001-e267-49c5-83e9-69a4979e1ed1.jpg", note: "Your smile is my sunrise after dark nights." }
+];
+const REEL_IMAGES = [
+  "https://i.ibb.co/HD2bK0Vv/IMG-2265.jpg",
+  "https://i.ibb.co/5WRx6YDq/IMG-2266.jpg",
+  "https://i.ibb.co/tp6zJsDj/IMG-3682.jpg",
+  "https://i.ibb.co/7Jcmj22X/IMG-3716.jpg",
+  "https://i.ibb.co/fGX91P8H/IMG-3713.jpg",
+  "https://i.ibb.co/Fb83nb9Q/IMG-3718.jpg",
+  "https://i.ibb.co/355SRZ0Z/74022-DD7-8-A77-499-B-AD48-B434418-A07-DF.png",
+  "https://i.ibb.co/WvTJngyF/IMG-3728.jpg"
+];
+
+function renderScrapbook() {
+  const grid = document.getElementById('scrapbook-grid');
+  grid.innerHTML = '';
+  SCRAPBOOK_IMAGES.forEach((src, i) => {
+    let frame = document.createElement('div');
+    frame.className = "scrapbook-img-frame";
+    let img = document.createElement('img');
+    img.src = src;
+    img.alt = "Scrapbook";
+    frame.appendChild(img);
+    frame.onclick = function (e) {
+      if (frame.querySelector('.scrapbook-popup')) {
+        frame.querySelector('.scrapbook-popup').remove();
+        frame.classList.remove("active");
+      } else {
+        document.querySelectorAll('.scrapbook-img-frame.active').forEach(f => {
+          f.classList.remove('active');
+          let old = f.querySelector('.scrapbook-popup');
+          if (old) old.remove();
+        });
+        frame.classList.add("active");
+        let note = document.createElement('div');
+        note.className = "scrapbook-popup";
+        note.innerHTML = SCRAPBOOK_NOTES[i % SCRAPBOOK_NOTES.length];
+        frame.appendChild(note);
+      }
+      e.stopPropagation();
+    };
+    grid.appendChild(frame);
+  });
+  grid.onclick = function (e) {
+    if (!e.target.classList.contains('scrapbook-img-frame') && !e.target.classList.contains('scrapbook-popup')) {
+      document.querySelectorAll('.scrapbook-img-frame.active').forEach(f => {
+        f.classList.remove('active');
+        let old = f.querySelector('.scrapbook-popup');
+        if (old) old.remove();
+      });
+    }
+  }
+}
+function renderCollage() {
+  const grid = document.getElementById('collage-grid');
+  grid.innerHTML = '';
+  POLAROIDS.forEach(obj => {
+    let pol = document.createElement('div');
+    pol.className = "polaroid";
+    let img = document.createElement('img');
+    img.src = obj.src;
+    img.alt = "Polaroid";
+    let cap = document.createElement('div');
+    cap.className = "polaroid-caption";
+    cap.innerText = obj.note;
+    pol.appendChild(img);
+    pol.appendChild(cap);
+    grid.appendChild(pol);
+  });
+}
+function renderReel() {
+  const strip = document.getElementById('reel-strip');
+  strip.innerHTML = '';
+  REEL_IMAGES.forEach((src,i) => {
+    let frame = document.createElement('div');
+    frame.className = "reel-img-frame";
+    let img = document.createElement('img');
+    img.src = src;
+    img.alt = "Memory";
+    frame.appendChild(img);
+    // On tap: little hearts burst!
+    frame.onclick = function(e){
+      burstHearts(e.clientX, e.clientY, 8);
+    }
+    strip.appendChild(frame);
+  });
+}
+// Envelope animation logic
+const envelope = document.getElementById("envelope");
+const envelopeHeartBtn = document.getElementById("envelope-heart-btn");
+const envelopeHeart = document.getElementById("envelope-heart");
+const envelopeFullscreen = document.getElementById("envelope-fullscreen");
+const loveFloating = document.getElementById("love-floating");
+const nextBtn0 = document.getElementById("next-btn-0");
+let envelopeOpened = false;
+envelopeHeart.onclick = function(e) {
+  if(envelopeOpened) return;
+  envelope.classList.add("open");
+  setTimeout(()=>{
+    envelopeFullscreen.style.display = 'flex';
+    loveRain(loveFloating, 36, 36, ["❤️","💕","💖","💘","💞"]);
+    nextBtn0.style.display = 'block';
+  }, 900);
+  envelopeOpened = true;
+}
+envelope.onclick = function(e){
+  if(!envelopeOpened) {
+    envelopeHeart.click();
+  }
+}
+function loveRain(el, n, dur, arr) {
+  el.innerHTML = '';
+  for(let i=0;i<n;i++) {
+    setTimeout(()=>{
+      let span = document.createElement('span');
+      span.textContent = arr[Math.floor(Math.random()*arr.length)];
+      span.style.position = 'absolute';
+      span.style.left = Math.random()*98 + 'vw';
+      span.style.top = '-10vh';
+      span.style.fontSize = (20 + Math.random()*34) + 'px';
+      span.style.opacity = 0.19 + Math.random()*0.26;
+      el.appendChild(span);
+      let t = 4 + Math.random()*dur/10;
+      span.animate([
+        {transform:'translateY(0) scale(1)'},
+        {transform:'translateY(110vh) scale(1.2)'}
+      ], {duration: t*1000, fill:'forwards',easing:'ease-in-out'});
+      setTimeout(()=>{if(span.parentNode)span.parentNode.removeChild(span);}, t*1000+100);
+    }, i*130+Math.random()*200);
+  }
+}
+// BG animation
+function bgAnim() {
+  const bg = document.getElementById('bg-anim');
+  function add(emoji, interval, sizeR, moveR) {
+    setInterval(() => {
+      if (!document.body.contains(bg)) return;
+      let el = document.createElement('span');
+      el.textContent = emoji;
+      el.style.position = 'absolute';
+      el.style.left = (Math.random()*98) + 'vw';
+      el.style.top = '-8vh';
+      el.style.fontSize = (sizeR[0]+Math.random()*(sizeR[1]-sizeR[0])) + 'px';
+      el.style.opacity = 0.18 + Math.random()*0.1;
+      el.style.pointerEvents = 'none';
+      bg.appendChild(el);
+      let dur = moveR[0]+Math.random()*(moveR[1]-moveR[0]);
+      el.animate([
+        { transform: `translateY(0) scale(1) rotate(0deg)` },
+        { transform: `translateY(105vh) scale(1.1) rotate(${Math.random()*46-23}deg)` }
+      ], { duration: dur * 1000, fill: 'forwards', easing: 'ease-in-out' });
+      setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, dur * 1000 + 500);
+    }, interval);
+  }
+  add("💖", 400, [24, 38], [5, 9]);
+  add("✨", 700, [17, 28], [7, 13]);
+  add("🌸", 900, [19, 29], [10, 14]);
+}
+bgAnim();
+
+function showPage(idx) {
+  for (let i = 0; i < 5; ++i) {
+    document.getElementById('page-' + i).classList.remove('active');
+  }
+  document.getElementById('page-' + idx).classList.add('active');
+  window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+}
+// Next buttons
+for (let i = 0; i < 4; i++) {
+  document.getElementById('next-btn-' + i).onclick = function() { showPage(i + 1); };
+}
+// Audio auto-play
+const music = document.getElementById('bg-music');
+music.play().catch(()=>{});
+document.body.addEventListener('click', function once(){
+  music.play().catch(()=>{});
+  document.body.removeEventListener('click', once);
+});
+
+// Render all dynamic content
+renderScrapbook();
+renderCollage();
+renderReel();
+
+// Heart burst on tap utility
+function burstHearts(x, y, n) {
+  for(let i=0;i<n;i++) {
+    let span = document.createElement('span');
+    span.textContent = ["💗","💖","💘","💕","❤️"][Math.floor(Math.random()*5)];
+    span.style.position = 'fixed';
+    span.style.left = x + 'px';
+    span.style.top = y + 'px';
+    span.style.fontSize = (16+Math.random()*17)+'px';
+    span.style.opacity = 1;
+    span.style.zIndex = 9999;
+    span.style.transition = 'all 1.1s cubic-bezier(.57,1.37,.73,.7)';
+    document.body.appendChild(span);
+    setTimeout(()=>{
+      let dx = (Math.random()-0.5)*180, dy = (Math.random()-0.8)*210;
+      span.style.transform = `translate(${dx}px,${dy}px) scale(${0.7+Math.random()*0.8}) rotate(${(Math.random()-0.5)*90}deg)`;
+      span.style.opacity = 0;
+    },5);
+    setTimeout(()=>{ if(span.parentNode)span.parentNode.removeChild(span); },1100);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Add heart burst to envelope heart
+  envelopeHeart.addEventListener('click', function(e){
+    burstHearts(window.innerWidth/2, window.innerHeight/2-50, 18);
+  });
+});
+
+// Add love tap animation to scrapbook and polaroids
+function addLoveTapAnimation(containerSelector, itemClass) {
+  const grid = document.querySelector(containerSelector);
+  grid.addEventListener('click', function(e){
+    let target = e.target;
+    while(target && !target.classList.contains(itemClass)) target = target.parentNode;
+    if(target) {
+      let rect = target.getBoundingClientRect();
+      burstHearts(rect.left+rect.width/2, rect.top+rect.height/2, 8);
+    }
+  });
+}
+addLoveTapAnimation('#scrapbook-grid', 'scrapbook-img-frame');
+addLoveTapAnimation('#collage-grid', 'polaroid');
+
+</script>
+</body>
+</html>
